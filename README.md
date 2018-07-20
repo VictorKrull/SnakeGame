@@ -1,7 +1,7 @@
 # SnakeGame
-My own version of the classical snake game.
+My own version of the classical snake game for console.
 
-This version of the game was developed using Visual C++ 2017. 
+This game was developed using Visual C++ 2017. 
 
 Windows compatible only.
 
