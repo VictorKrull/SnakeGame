@@ -27,14 +27,11 @@ bool SnakeGame::isOver(deque<Point> &snake, Point &target_position, pair<int, in
 	{
 		return true;
 	}
-	if (target_position.getX() <= 0 || target_position.getY() <= 0)
+	if (target_position.getX() <= -1 || target_position.getX() >= size_map.first - 2 ||
+			target_position.getY() <= 1 || target_position.getY() >= size_map.second - 3)
 	{
 		return true;
-	}
-	if (target_position.getX() >= size_map.first - 2 || target_position.getY() >= size_map.second - 3)
-	{
-		return true;
-	}
+	}	
 	return false;
 }
 
@@ -71,30 +68,30 @@ SnakeGame::Direction SnakeGame::getDirection(SnakeGame::Direction current_direct
 	switch (key)
 	{
 		case 'w':
-			if (current_direction != SnakeGame::Direction::down)
+			if (current_direction != SnakeGame::Direction::DOWN)
 			{
-				current_direction = SnakeGame::Direction::up;
+				current_direction = SnakeGame::Direction::UP;
 			}
 		break;
 
 		case 's':
-			if (current_direction != SnakeGame::Direction::up)
+			if (current_direction != SnakeGame::Direction::UP)
 			{
-				current_direction = SnakeGame::Direction::down;
+				current_direction = SnakeGame::Direction::DOWN;
 			}
 		break;
 
 		case 'a':
-			if (current_direction != SnakeGame::Direction::right)
+			if (current_direction != SnakeGame::Direction::RIGHT)
 			{
-				current_direction = SnakeGame::Direction::left;
+				current_direction = SnakeGame::Direction::LEFT;
 			}
 		break;
 
 		case 'd':
-			if (current_direction != SnakeGame::Direction::left)
+			if (current_direction != SnakeGame::Direction::LEFT)
 			{
-				current_direction = SnakeGame::Direction::right;
+				current_direction = SnakeGame::Direction::RIGHT;
 			}
 		break;		
 	}	
@@ -107,19 +104,19 @@ Point SnakeGame::getNextPosition(SnakeGame::Direction direction, Point &current_
 
 	switch (direction)
 	{
-		case SnakeGame::Direction::up:
+		case SnakeGame::Direction::UP:
 			next_position.setY(next_position.getY() - 1);
 		break;
 
-		case SnakeGame::Direction::down:
+		case SnakeGame::Direction::DOWN:
 			next_position.setY(next_position.getY() + 1);
 		break;
 
-		case SnakeGame::Direction::left:
+		case SnakeGame::Direction::LEFT:
 			next_position.setX(next_position.getX() - 1);
 		break;
 
-		case SnakeGame::Direction::right:
+		case SnakeGame::Direction::RIGHT:
 			next_position.setX(next_position.getX() + 1);
 		break;
 	}
@@ -181,22 +178,15 @@ void SnakeGame::displayScore(int player_score)
 
 void SnakeGame::showInstructions()
 {
-	char key;
-
-	cout << "Instrucciones:\n\n";
+	cout << "\nInstrucciones:\n\n";
 	cout << "1. Para mover a la serpiente solo puedes usar las teclas \'a\', \'s\', \'d\' y \'w\'.\n\n";
 	cout << "2. Perder\240s si la serpiente colisiona contra el borde del mapa o contra su \npropio cuerpo.\n\n";
 	cout << "3. Ganar\240s 10 puntos cada vez que la serpiente coma su alimento.\n\n";
-	cout << "\nPresiona la tecla <ENTER> para volver al men\243.\n";
-
-	hide_cursor();
-	do
-	{
-		key = console::get_key();
-	} while (key != 13); //ENTER KEY
+	cout << "\nPresiona cualquier tecla para regresar al men\243 principal.\n";
+	get_key();
 }
 
-string SnakeGame::ask()
+string SnakeGame::askUser()
 {
 	string rpta;
 
@@ -204,53 +194,66 @@ string SnakeGame::ask()
 	{
 		cout << "\250Realmente deseas salir del juego? (S)---(N):\t";
 		getline(cin, rpta);
+		rpta = trim_str(rpta);
 
 		if (!equals(rpta, "s") && !equals(rpta, "n"))
 		{
-			cerr << "\nERROR. Solo puede ingresar \'S\', \'s\', \'N\' o \'n\'.\n\n";
+			cerr << "\nERROR. Solo puedes ingresar \'S\', \'s\', \'N\' o \'n\'.\n\n";
 		}
 	} while (!equals(rpta, "s") && !equals(rpta, "n"));
 
 	return rpta;
 }
 
-void SnakeGame::run()
+void SnakeGame::run(int snake_speed)
 {
-	SnakeGame snakegame;
 	deque<Point> snake;
 	Point current_position(0, 9);
 	Point food_position = Point();
-	SnakeGame::Direction direction = SnakeGame::Direction::right;
+	SnakeGame::Direction direction = SnakeGame::Direction::RIGHT;
 	pair<int, int> size_map(get_console_window_width(), get_console_window_height());	
-	unsigned int snake_length = 3, snake_speed = 100, player_score = snakegame.getScore();	
+	unsigned int snake_length = 3, player_score = getScore();	
 
 	snake.push_back(current_position);
-	snakegame.drawMap(size_map);
-	snakegame.displayScore(player_score);	
+	drawMap(size_map);
+	displayScore(player_score);
 	do
 	{
 		sleep_ms(snake_speed);
-		snakegame.drawSnake(snake, current_position, size_map, snake_length);
-		direction = snakegame.getDirection(direction);
-		current_position = snakegame.getNextPosition(direction, current_position);
+		drawSnake(snake, current_position, size_map, snake_length);		
+		direction = getDirection(direction);		
+		current_position = getNextPosition(direction, current_position);
 		if (current_position.compare(food_position))
 		{
 			food_position = Point();
 			snake_length++;
-			player_score += 10;			
-			snakegame.displayScore(player_score);
+			player_score += 10;
+			displayScore(player_score);
 		}
 		if (food_position.compare(Point()))
 		{
-			food_position = snakegame.showFood(snake, size_map);
-		}
-		clear_console_input_buffer();
-	} while (!snakegame.isOver(snake, current_position, size_map));
+			food_position = showFood(snake, size_map);
+		}		
+	} while (!isOver(snake, current_position, size_map));
+
+	write_at_position("\255\255\255PERDISTE!!!", get_console_window_height() / 2 + 5, get_console_window_width() / 4);
+}
+
+void SnakeGame::reload()
+{
+	char key;
+
+	make_sound();
+	write_at_position("Presiona la tecla <ENTER> para volver a jugar", get_console_window_height() / 2 + 5, get_console_window_width() / 4 + 1);
+	do
+	{
+		key = get_key();
+	} while (key != 0x0D); //ENTER KEY
 }
 
 void SnakeGame::close()
 {
 	cout << "Gracias por jugar el videojuego.\nSi encuentra alg\243n bug, por favor rep\242rtelo al correo maxdr.mat\100gmail.com.\n\n";
-	cout << "Presione cualquier tecla para salir.\n";
-	console::get_key();
+	cout << "Presiona cualquier tecla para cerrar el programa.\n";
+	get_key();
 }
