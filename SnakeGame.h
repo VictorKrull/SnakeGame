@@ -6,29 +6,30 @@
 class SnakeGame
 {
 private:
-	int score;
+	int score;	
 	Point food;
 
 public:
 	enum Level
 	{
-		easy, normal, hard, insane
+		EASY = 1, NORMAL, HARD, INSANE
 	};
 	enum Direction
 	{
-		up, down, left, right
+		UP, DOWN, LEFT, RIGHT
 	};
 	SnakeGame();
-	bool isOver(std::deque<Point>&, Point&, std::pair<int, int>&);
-	void drawSnake(std::deque<Point>&, Point&, std::pair<int, int>&, unsigned int);
-	Direction getDirection(SnakeGame::Direction);
-	Point getNextPosition(SnakeGame::Direction, Point&);
-	void drawMap(std::pair<int, int>&);
-	Point showFood(std::deque<Point>&, std::pair<int, int>&);
+	bool isOver(std::deque<Point> &snake, Point &target_position, std::pair<int, int> &size_map);
+	void drawSnake(std::deque<Point> &snake, Point &target_position, std::pair<int, int> &size_map, unsigned int snake_length);
+	Direction getDirection(SnakeGame::Direction current_direction);
+	Point getNextPosition(SnakeGame::Direction direction, Point &current_position);
+	void drawMap(std::pair<int, int> &size_map);
+	Point showFood(std::deque<Point> &snake, std::pair<int, int> &size_map);
 	int getScore();	
-	void displayScore(int);
+	void displayScore(int player_score);	
 	void showInstructions();
-	std::string ask();
-	void run();
+	std::string askUser();
+	void run(int snake_speed);
+	void reload();
 	void close();	
 };
